@@ -111,7 +111,7 @@ app.get('/something', function(req, res, next){
   next();
   //since there are two gets looking for the same thing
   // we need to call next in order for it to look at
-  // the next get
+  // the next get request handler
 });
 
 app.get('/something', function(req, res, next){
