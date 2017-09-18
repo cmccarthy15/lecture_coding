@@ -17,12 +17,9 @@
 // });
 
 
-
 // server.listen(1337, function(){
 //   console.log('listening on port 1337...');
 // });
-
-
 
 
 // WITH EXPRESS
@@ -103,7 +100,6 @@ app.post('/times2', function(req, res){
 });
 
 
-
 //our own middleware
 //next is secretly always there and would be used by middleware
 app.get('/something', function(req, res, next){
@@ -111,9 +107,71 @@ app.get('/something', function(req, res, next){
   next();
   //since there are two gets looking for the same thing
   // we need to call next in order for it to look at
-  // the next get request handler
+  // the next get request handler for that specific route
 });
 
 app.get('/something', function(req, res, next){
   res.send('finally!');
 });
+
+// with middleware, request object for the next handler will
+// be the same because it passes the same object through
+
+
+//app.use can take an optional URI or just a callback function
+app.use(function(req, res, next){
+  console.log('i always run');
+  next();
+}); // without a specified URI, it'll match on everything
+
+//contrast with app.all which doesn't do partial URL matching
+// if you don't specify a URI with all, it'll only match
+// all requests of all method types, but just to
+app.all('/', function(req, res, next){
+  console.log('I run for all requests to /');
+  next();
+});
+//FOLLOW UP ON .ALL IS COMING
+// MAY HAVE UPDATED IN THE LAST BUILD
+// people don't tend to use .all here anyway
+// usually use .use b/c of partial URL matching
+
+//ERROR HANDLING
+//if next receives an argument, it assumes it's an error and
+// it will log it out for you
+// err = new Error('message');
+// err.status = 500;
+// next(err)
+// CAN ALSO write our own error handling middleware
+
+app.use(function(err, req, res, next){
+  //if next gets passed an err it'll look for the next call that has four paramters instead of 3
+  // then you can customize the output
+  console.log('something went wrong', err);
+  res.send('something went wrong' + err.message);
+});
+
+
+
+// as you write larger and larger apps...
+// might find you want subapps with their req handlers
+// can do that w/ express w/ a router
+// essentially a mini app you can connect back into your main app
+
+//bird router!!
+var router = express.Router();
+router.get('/crow', function(req, res, next){
+  res.send('caw');
+});
+router.get('/chicken', function(req, res, next){
+  res.send('bawk');
+});
+router.get('/turkey', function(req, res, next){
+  res.send('gobble');
+});
+
+//not connected yet! ^ ^ ^ ^
+//without /birds, anything with matching above
+//with /birds, needs /birds first
+app.use("/birds", router);
+
